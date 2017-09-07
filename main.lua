@@ -66,7 +66,10 @@ BoE.OnEnable = function(self)
 					cache[self]:SetText("")
 				end
 			end 
-
+		else
+			if cache[self] then
+				cache[self]:SetText("")
+			end
 		end
 	end)
 end
