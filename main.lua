@@ -27,7 +27,7 @@ BoE.OnEnable = function(self)
 		local itemLink = self:GetItem() -- GetContainerItemLink(self:GetBag(), self:GetID())
 		if itemLink then
 
-			local itemName, itemLink, itemRarity, iLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
+			local itemName, _, itemRarity, iLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
 			
 			local itemID = tonumber(string_match(itemLink, "item:(%d+)"))
 
