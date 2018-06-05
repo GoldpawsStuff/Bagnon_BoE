@@ -14,7 +14,7 @@ Also, make sure the game is closed when moving new files into the addon director
 ## Report bugs, suggest features, development progress
 Bug reports and feature suggestions are all done through BitBucket's Issue tracker linked below. 
 
-* Issues: [github.com/cogwerkz/Bagnon_BoE/issues](https://github.com/cogwerkz/Bagnon_BoE/issues)
+* Issues: [bitbucket.org/bigcogs/bagnon_boe/issues](https://bitbucket.org/bigcogs/bagnon_boe/issues)
 
 ## Join the community
 If you wish to get more involved, have some questions you can't find answers to anywhere else or simply just wish to stop by and say hello, we have both a [discord](https://discordapp.com/) server and a facebook page.
