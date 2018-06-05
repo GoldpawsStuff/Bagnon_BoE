@@ -75,47 +75,39 @@ BoE.OnEnable = function(self)
 			local itemID = tonumber(string_match(itemLink, "item:(%d+)"))
 
 			-- Display the bind status of BoE(Bind on Equip) and BoU(Bind on Use) items.
-			if (itemRarity and (itemRarity > 1)) and ((bindType == 2) or (bindType == 3)) then
-	
-				if (not isItemBound(self)) then
-					if (not cache[self]) then
+			if (itemRarity and (itemRarity > 1)) and ((bindType == 2) or (bindType == 3)) and (not isItemBound(self)) then
+				if (not cache[self]) then
 
-						-- Adding an extra layer to get it above glow and border textures
-						local holder = _G[self:GetName().."ExtraInfoFrame"] or CreateFrame("Frame", self:GetName().."ExtraInfoFrame", self)
-						holder:SetAllPoints()
-	
-						-- Using standard blizzard fonts here
-						local msg = holder:CreateFontString()
-						msg:SetDrawLayer("ARTWORK")
-						msg:SetPoint("BOTTOMLEFT", 2, 2)
-						msg:SetFontObject(_G.NumberFont_Outline_Med or _G.NumberFontNormal) 
-						msg:SetFont(msg:GetFont(), 11, "OUTLINE")
-						msg:SetShadowOffset(1, -1)
-						msg:SetShadowColor(0, 0, 0, .5)
-	
-						-- Move Pawn out of the way
-						if self.UpgradeIcon then
-							self.UpgradeIcon:ClearAllPoints()
-							self.UpgradeIcon:SetPoint("BOTTOMRIGHT", 2, 0)
-						end
-	
-						cache[self] = msg
+					-- Adding an extra layer to get it above glow and border textures
+					local holder = _G[self:GetName().."ExtraInfoFrame"] or CreateFrame("Frame", self:GetName().."ExtraInfoFrame", self)
+					holder:SetAllPoints()
+
+					-- Using standard blizzard fonts here
+					local msg = holder:CreateFontString()
+					msg:SetDrawLayer("ARTWORK")
+					msg:SetPoint("BOTTOMLEFT", 2, 2)
+					msg:SetFontObject(_G.NumberFont_Outline_Med or _G.NumberFontNormal) 
+					msg:SetFont(msg:GetFont(), 11, "OUTLINE")
+					msg:SetShadowOffset(1, -1)
+					msg:SetShadowColor(0, 0, 0, .5)
+
+					-- Move Pawn out of the way
+					if self.UpgradeIcon then
+						self.UpgradeIcon:ClearAllPoints()
+						self.UpgradeIcon:SetPoint("BOTTOMRIGHT", 2, 0)
 					end
 
-					local r, g, b = GetItemQualityColor(itemRarity)
-					cache[self]:SetTextColor(r * 2/3, g * 2/3, b * 2/3)
-					cache[self]:SetText((bindType == 3) and L["BoU"] or L["BoE"])
-
-				else 
-					if cache[self] then
-						cache[self]:SetText("")
-					end
+					cache[self] = msg
 				end
-			else
+
+				local r, g, b = GetItemQualityColor(itemRarity)
+				cache[self]:SetTextColor(r * 2/3, g * 2/3, b * 2/3)
+				cache[self]:SetText((bindType == 3) and L["BoU"] or L["BoE"])
+			else 
 				if cache[self] then
 					cache[self]:SetText("")
 				end
-			end 
+			end
 		else
 			if cache[self] then
 				cache[self]:SetText("")
