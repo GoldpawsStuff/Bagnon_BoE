@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.12-Release] 2019-03-29
+### Changed
+- Updated addon detection to avoid messing with the addon loading order. 
+- Update toc display name to be in line with the main bagnon addon. 
+- Updated description links and team name.
+
 ## [1.0.11-Release] 2019-02-27
 ### Fixed
 - Item background scanning should once more update properly when you swap items in a bag slot, and not show the bind status of the item that was previously there. 
