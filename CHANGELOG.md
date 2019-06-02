@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.0.12-Release] 2019-03-29
 ### Changed
 - Updated addon detection to avoid messing with the addon loading order. 
-- Update toc display name to be in line with the main bagnon addon. 
+- Updated toc display name to be in line with the main bagnon addon. 
 - Updated description links and team name.
 
 ## [1.0.11-Release] 2019-02-27
