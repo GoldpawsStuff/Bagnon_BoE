@@ -101,25 +101,26 @@ local GetPluginContainter = function(button)
 end
 
 local Cache_GetItemBind = function(button)
-	local ItemBind = GetPluginContainter(button):CreateFontString()
-	ItemBind:SetDrawLayer("ARTWORK")
-	ItemBind:SetPoint("BOTTOMLEFT", 2, 2)
-	ItemBind:SetFontObject(_G.NumberFont_Outline_Med or _G.NumberFontNormal) 
-	ItemBind:SetFont(ItemBind:GetFont(), 11, "OUTLINE")
-	ItemBind:SetShadowOffset(1, -1)
-	ItemBind:SetShadowColor(0, 0, 0, .5)
+	if (not Cache_ItemBind[button]) then
+		local ItemBind = GetPluginContainter(button):CreateFontString()
+		ItemBind:SetDrawLayer("ARTWORK")
+		ItemBind:SetPoint("BOTTOMLEFT", 2, 2)
+		ItemBind:SetFontObject(_G.NumberFont_Outline_Med or _G.NumberFontNormal) 
+		ItemBind:SetFont(ItemBind:GetFont(), 11, "OUTLINE")
+		ItemBind:SetShadowOffset(1, -1)
+		ItemBind:SetShadowColor(0, 0, 0, .5)
 
-	-- Move Pawn out of the way
-	local UpgradeIcon = button.UpgradeIcon
-	if UpgradeIcon then
-		UpgradeIcon:ClearAllPoints()
-		UpgradeIcon:SetPoint("BOTTOMRIGHT", 2, 0)
+		-- Move Pawn out of the way
+		local UpgradeIcon = button.UpgradeIcon
+		if UpgradeIcon then
+			UpgradeIcon:ClearAllPoints()
+			UpgradeIcon:SetPoint("BOTTOMRIGHT", 2, 0)
+		end
+
+		-- Store the reference for the next time
+		Cache_ItemBind[button] = ItemBind
 	end
-
-	-- Store the reference for the next time
-	Cache_ItemBind[button] = ItemBind
-
-	return ItemBind
+	return Cache_ItemBind[button]
 end
 
 -----------------------------------------------------------
@@ -158,4 +159,7 @@ local Update = function(self)
 	end	
 end 
 
-hooksecurefunc(Bagnon.ItemSlot, "Update", Update)
+local item = Bagnon.ItemSlot or Bagnon.Item
+if (item) and (item.Update) then
+	hooksecurefunc(item, "Update", Update)
+end
