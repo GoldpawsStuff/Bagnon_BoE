@@ -87,14 +87,17 @@ local Update = function(self)
 			ScannerTip.slot = slot
 			ScannerTip:SetOwner(self, "ANCHOR_NONE")
 			ScannerTip:SetBagItem(bag,slot)
+			showStatus = true
 			for i = 2,6 do 
 				local line = _G[ScannerTipName.."TextLeft"..i]
 				if (not line) then
 					break
 				end
 				local msg = line:GetText()
-				if (msg) and not(string_find(msg, S_ITEM_BOUND1) or string_find(msg, S_ITEM_BOUND2) or string_find(msg, S_ITEM_BOUND3)) then 
-					showStatus = true
+				if (msg) then 
+					if (string_find(msg, S_ITEM_BOUND1) or string_find(msg, S_ITEM_BOUND2) or string_find(msg, S_ITEM_BOUND3)) then 
+						showStatus = nil
+					end
 				end
 			end
 		end
