@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.25-Release] 2021-06-10
+### Changed
+- Updated to have BC and Classic versions.
+
 ## [1.0.24-Release] 2021-05-04
 ### Fixed
 - Soulbound items should no longer be displayed as still BoE.
