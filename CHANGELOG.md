@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.27-Release] 2021-09-01
+- Bump TOC for BCC 2.5.2.
+
 ## [1.0.26-Release] 2021-06-29
 - Bump toc for 9.1.0.
 
