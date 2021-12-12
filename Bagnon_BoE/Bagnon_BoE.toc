@@ -14,5 +14,6 @@
 ## X-License: Custom
 
 ## RequiredDeps: Bagnon
+## SavedVariables: BagnonBoE_DB
 
 main.lua

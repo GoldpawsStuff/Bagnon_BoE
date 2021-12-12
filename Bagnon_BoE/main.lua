@@ -12,6 +12,7 @@ if (function(addon)
 		end
 	end
 end)("Bagnon_ItemInfo") then 
+	print("|cffff1111"..(...).." was auto-disabled.")
 	return 
 end 
 
@@ -26,7 +27,11 @@ local ScannerTip = _G[ScannerTipName] or CreateFrame("GameTooltip", ScannerTipNa
 -- Lua API
 local _G = _G
 local string_find = string.find
+local string_gsub = string.gsub
+local string_lower = string.lower
 local string_match = string.match
+local string_split = string.split
+local string_upper = string.upper
 
 -- WoW API
 local GetItemQualityColor = _G.GetItemQualityColor
@@ -47,6 +52,60 @@ local L = {
 -- FontString Caches
 local Cache_ItemBind = {}
 
+
+-----------------------------------------------------------
+-- Slash Command & Options Handling
+-----------------------------------------------------------
+do
+	-- Saved settings
+	BagnonBoE_DB = {
+		enableRarityColoring = true
+	}
+
+	local slashCommand = function(msg, editBox)
+		local action, element
+
+		-- Remove spaces at the start and end
+		msg = string_gsub(msg, "^%s+", "")
+		msg = string_gsub(msg, "%s+$", "")
+
+		-- Replace all space characters with single spaces
+		msg = string_gsub(msg, "%s+", " ") 
+
+		-- Extract the arguments 
+		if string_find(msg, "%s") then
+			action, element = string_split(" ", msg) 
+		else
+			action = msg
+		end
+
+		if (action == "enable") then 
+			if (element == "color") then 
+				BagnonBoE_DB.enableRarityColoring = true
+			end
+
+		elseif (action == "disable") then 
+			if (element == "color") then 
+				BagnonBoE_DB.enableRarityColoring = false
+			end
+		end
+	end
+
+	-- Create a unique name for the command
+	local commands = { "bagnonboe", "bboe", "boe" }
+	for i = 1,#commands do 
+		-- Register the chat command, keep hash upper case, value lowercase
+		local command = commands[i]
+		local name = "AZERITE_TEAM_PLUGIN_"..string_upper(command) 
+		_G["SLASH_"..name.."1"] = "/"..string_lower(command)
+		_G.SlashCmdList[name] = slashCommand
+	end
+end
+
+
+-----------------------------------------------------------
+-- Utility Functions
+-----------------------------------------------------------
 local GetPluginContainter = function(button)
 	local name = button:GetName() .. "ExtraInfoFrame"
 	local frame = _G[name]
@@ -76,12 +135,14 @@ local Cache_GetItemBind = function(button)
 	return Cache_ItemBind[button]
 end
 
+-----------------------------------------------------------
+-- Main Update
+-----------------------------------------------------------
 local Update = function(self)
 	local showStatus
 	local itemLink = self:GetItem() 
 	if (itemLink) then
 		local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
-		local itemID = tonumber(string_match(itemLink, "item:(%d+)"))
 		if (itemRarity and (itemRarity > 1)) and ((bindType == 2) or (bindType == 3)) then
 			local bag,slot = self:GetBag(), self:GetID()
 			ScannerTip.owner = self
@@ -106,7 +167,11 @@ local Update = function(self)
 		if (showStatus) then
 			local ItemBind = Cache_ItemBind[self] or Cache_GetItemBind(self)
 			local r, g, b = GetItemQualityColor(itemRarity)
-			ItemBind:SetTextColor(r * 2/3, g * 2/3, b * 2/3)
+			if (BagnonBoE_DB.enableRarityColoring) then
+				ItemBind:SetTextColor(r * 2/3, g * 2/3, b * 2/3)
+			else
+				ItemLevel:SetTextColor(240/255, 240/255, 240/255)
+			end
 			ItemBind:SetText((bindType == 3) and L["BoU"] or L["BoE"])
 		end
 	end	
