@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.33-Release] 2022-02-06
+### Fixed
+- Fixed an issue where bind status would not be properly updated when equipping items.
+
 ## [1.0.32-Release] 2021-12-12
 ### Added
 - Added commands to toggle between rarity colored text, and a much clearer white.
