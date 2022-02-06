@@ -150,7 +150,6 @@ local Update = function(self)
 			if (isBound) then
 				showStatus = nil
 			end
-			print("updating",bag,slot,GetTime())
 			--ScannerTip.owner = self
 			--ScannerTip.bag = bag
 			--ScannerTip.slot = slot

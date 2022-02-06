@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.34-Release] 2022-02-06
+### Fixed
+- Removed the debug output from the previous update that in no way was supposed to be a part of that update!
+
 ## [1.0.33-Release] 2022-02-06
 ### Fixed
 - Fixed an issue where bind status would not be properly updated when equipping items.
