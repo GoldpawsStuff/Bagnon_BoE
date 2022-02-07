@@ -140,53 +140,29 @@ end
 -- Main Update
 -----------------------------------------------------------
 local Update = function(self)
-	local showStatus
 	local itemLink = self:GetItem() 
 	if (itemLink) then
 		local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
+		
 		if (itemRarity and (itemRarity > 1)) and ((bindType == 2) or (bindType == 3)) then
 			local bag,slot = self:GetBag(), self:GetID()
 			local _, _, _, _, _, _, _, _, _, _, isBound = GetContainerItemInfo(bag, slot)
-			if (isBound) then
-				showStatus = nil
+			if (not isBound) then
+				local ItemBind = Cache_ItemBind[self] or Cache_GetItemBind(self)
+				local r, g, b = GetItemQualityColor(itemRarity)
+				if (BagnonBoE_DB.enableRarityColoring) then
+					ItemBind:SetTextColor(r * 2/3, g * 2/3, b * 2/3)
+				else
+					ItemLevel:SetTextColor(240/255, 240/255, 240/255)
+				end
+				ItemBind:SetText((bindType == 3) and L["BoU"] or L["BoE"])
+				return
 			end
-			--ScannerTip.owner = self
-			--ScannerTip.bag = bag
-			--ScannerTip.slot = slot
-			--ScannerTip:SetOwner(self, "ANCHOR_NONE")
-			--ScannerTip:SetBagItem(bag,slot)
-			--showStatus = true
-			--for i = 2,6 do 
-			--	local line = _G[ScannerTipName.."TextLeft"..i]
-			--	if (not line) then
-			--		break
-			--	end
-			--	local msg = line:GetText()
-			--	if (msg) then 
-			--		if (string_find(msg, S_ITEM_BOUND1) or string_find(msg, S_ITEM_BOUND2) or string_find(msg, S_ITEM_BOUND3)) then 
-			--			showStatus = nil
-			--		end
-			--	end
-			--end
-		end
-		if (showStatus) then
-			local ItemBind = Cache_ItemBind[self] or Cache_GetItemBind(self)
-			local r, g, b = GetItemQualityColor(itemRarity)
-			if (BagnonBoE_DB.enableRarityColoring) then
-				ItemBind:SetTextColor(r * 2/3, g * 2/3, b * 2/3)
-			else
-				ItemLevel:SetTextColor(240/255, 240/255, 240/255)
-			end
-			ItemBind:SetText((bindType == 3) and L["BoU"] or L["BoE"])
-		else
-			if Cache_ItemBind[self] then 
-				Cache_ItemBind[self]:SetText("")
-			end	
 		end
 	end	
-	if (not showStatus) and (Cache_ItemBind[self]) then 
+	if (Cache_ItemBind[self]) then 
 		Cache_ItemBind[self]:SetText("")
-	end	
+	end
 end 
 
 local item = Bagnon.ItemSlot or Bagnon.Item

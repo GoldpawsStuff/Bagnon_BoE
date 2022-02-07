@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.35-Release] 2022-02-07
+### Fixed
+- Bind status shows as intended now.
+
 ## [1.0.34-Release] 2022-02-06
 ### Fixed
 - Removed the debug output from the previous update that in no way was supposed to be a part of that update!
