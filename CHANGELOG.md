@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.36-Release] 2022-02-16
+- ToC bumps and license update.
+
 ## [1.0.35-Release] 2022-02-07
 ### Fixed
 - Bind status shows as intended now.
