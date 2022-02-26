@@ -43,6 +43,10 @@ local S_ITEM_BOUND1 = _G.ITEM_SOULBOUND
 local S_ITEM_BOUND2 = _G.ITEM_ACCOUNTBOUND
 local S_ITEM_BOUND3 = _G.ITEM_BNETACCOUNTBOUND
 
+-- WoW Client Versions
+local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+local WoWBCC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+
 -- Localization. 
 -- *Just enUS so far. 
 local L = {
@@ -145,19 +149,55 @@ local Update = function(self)
 		local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
 		
 		if (itemRarity and (itemRarity > 1)) and ((bindType == 2) or (bindType == 3)) then
-			local bag,slot = self:GetBag(), self:GetID()
+			-- print("parsing", itemName, itemRarity, bindType) -- ok
+
+			local showStatus = true
+			local bag,slot = self:GetBag(),self:GetID()
 			local _, _, _, _, _, _, _, _, _, _, isBound = GetContainerItemInfo(bag, slot)
-			if (not isBound) then
+			if (isBound) then
+				showStatus = nil
+			end
+
+			-- Bug report #6 indicates that GetContainerItemInfo isn't returning 'isBound' in the classics. 
+			if (showStatus) and (WoWBCC or WoWClassic) then
+				ScannerTip.owner = self
+				ScannerTip.bag = bag
+				ScannerTip.slot = slot
+				ScannerTip:SetOwner(self, "ANCHOR_NONE")
+				ScannerTip:SetBagItem(bag,slot)
+
+				for i = 2,6 do 
+					local line = _G[ScannerTipName.."TextLeft"..i]
+					if (not line) then
+						break
+					end
+					local msg = line:GetText()
+					if (msg) then 
+						if (string_find(msg, S_ITEM_BOUND1) or string_find(msg, S_ITEM_BOUND2) or string_find(msg, S_ITEM_BOUND3)) then 
+							showStatus = nil
+							break
+						end
+					end
+				end
+			end
+
+			if (showStatus) then
 				local ItemBind = Cache_ItemBind[self] or Cache_GetItemBind(self)
-				local r, g, b = GetItemQualityColor(itemRarity)
 				if (BagnonBoE_DB.enableRarityColoring) then
-					ItemBind:SetTextColor(r * 2/3, g * 2/3, b * 2/3)
+					local r, g, b = GetItemQualityColor(itemRarity)
+					local m = (itemRarity == 3 or itemRarity == 4) and 1 or 2/3
+					ItemBind:SetTextColor(r * m, g * m, b * m)
 				else
-					ItemLevel:SetTextColor(240/255, 240/255, 240/255)
+					ItemBind:SetTextColor(240/255, 240/255, 240/255)
 				end
 				ItemBind:SetText((bindType == 3) and L["BoU"] or L["BoE"])
 				return
+			else
+				if Cache_ItemBind[self] then 
+					Cache_ItemBind[self]:SetText("")
+				end	
 			end
+
 		end
 	end	
 	if (Cache_ItemBind[self]) then 
