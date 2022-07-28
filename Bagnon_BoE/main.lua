@@ -5,16 +5,16 @@ if (function(addon)
 	for i = 1,GetNumAddOns() do
 		local name, title, notes, loadable, reason, security, newVersion = GetAddOnInfo(i)
 		if (name:lower() == addon:lower()) then
-			local enabled = not(GetAddOnEnableState(UnitName("player"), i) == 0) 
+			local enabled = not(GetAddOnEnableState(UnitName("player"), i) == 0)
 			if (enabled and loadable) then
 				return true
 			end
 		end
 	end
-end)("Bagnon_ItemInfo") then 
+end)("Bagnon_ItemInfo") then
 	print("|cffff1111"..(...).." was auto-disabled.")
-	return 
-end 
+	return
+end
 
 local MODULE =  ...
 local ADDON, Addon = MODULE:match("[^_]+"), _G[MODULE:match("[^_]+")]
@@ -43,14 +43,16 @@ local S_ITEM_BOUND1 = _G.ITEM_SOULBOUND
 local S_ITEM_BOUND2 = _G.ITEM_ACCOUNTBOUND
 local S_ITEM_BOUND3 = _G.ITEM_BNETACCOUNTBOUND
 
--- WoW Client Versions
-local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-local WoWBCC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+-- WoW Client versions
+local MAJOR = tonumber((string_split(".", (GetBuildInfo()))))
+local WoWClassic = MAJOR == 1
+local WoWBCC = MAJOR == 2
+local WoWWotLK = MAJOR == 3
 
--- Localization. 
--- *Just enUS so far. 
+-- Localization.
+-- *Just enUS so far.
 local L = {
-	["BoE"] = "BoE", -- Bind on Equip 
+	["BoE"] = "BoE", -- Bind on Equip
 	["BoU"] = "BoU"  -- Bind on Use
 }
 
@@ -75,22 +77,22 @@ do
 		msg = string_gsub(msg, "%s+$", "")
 
 		-- Replace all space characters with single spaces
-		msg = string_gsub(msg, "%s+", " ") 
+		msg = string_gsub(msg, "%s+", " ")
 
-		-- Extract the arguments 
+		-- Extract the arguments
 		if string_find(msg, "%s") then
-			action, element = string_split(" ", msg) 
+			action, element = string_split(" ", msg)
 		else
 			action = msg
 		end
 
-		if (action == "enable") then 
-			if (element == "color") then 
+		if (action == "enable") then
+			if (element == "color") then
 				BagnonBoE_DB.enableRarityColoring = true
 			end
 
-		elseif (action == "disable") then 
-			if (element == "color") then 
+		elseif (action == "disable") then
+			if (element == "color") then
 				BagnonBoE_DB.enableRarityColoring = false
 			end
 		end
@@ -98,10 +100,10 @@ do
 
 	-- Create a unique name for the command
 	local commands = { "bagnonboe", "bboe", "boe" }
-	for i = 1,#commands do 
+	for i = 1,#commands do
 		-- Register the chat command, keep hash upper case, value lowercase
 		local command = commands[i]
-		local name = "AZERITE_TEAM_PLUGIN_"..string_upper(command) 
+		local name = "AZERITE_TEAM_PLUGIN_"..string_upper(command)
 		_G["SLASH_"..name.."1"] = "/"..string_lower(command)
 		_G.SlashCmdList[name] = slashCommand
 	end
@@ -114,10 +116,10 @@ end
 local GetPluginContainter = function(button)
 	local name = button:GetName() .. "ExtraInfoFrame"
 	local frame = _G[name]
-	if (not frame) then 
+	if (not frame) then
 		frame = CreateFrame("Frame", name, button)
 		frame:SetAllPoints()
-	end 
+	end
 	return frame
 end
 
@@ -126,7 +128,7 @@ local Cache_GetItemBind = function(button)
 		local ItemBind = GetPluginContainter(button):CreateFontString()
 		ItemBind:SetDrawLayer("ARTWORK")
 		ItemBind:SetPoint("BOTTOMLEFT", 2, 2)
-		ItemBind:SetFontObject(_G.NumberFont_Outline_Med or _G.NumberFontNormal) 
+		ItemBind:SetFontObject(_G.NumberFont_Outline_Med or _G.NumberFontNormal)
 		ItemBind:SetFont(ItemBind:GetFont(), 12, "OUTLINE")
 		ItemBind:SetShadowOffset(1, -1)
 		ItemBind:SetShadowColor(0, 0, 0, .5)
@@ -144,10 +146,10 @@ end
 -- Main Update
 -----------------------------------------------------------
 local Update = function(self)
-	local itemLink = self:GetItem() 
+	local itemLink = self:GetItem()
 	if (itemLink) then
 		local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
-		
+
 		if (itemRarity and (itemRarity > 1)) and ((bindType == 2) or (bindType == 3)) then
 			-- print("parsing", itemName, itemRarity, bindType) -- ok
 
@@ -158,22 +160,22 @@ local Update = function(self)
 				showStatus = nil
 			end
 
-			-- Bug report #6 indicates that GetContainerItemInfo isn't returning 'isBound' in the classics. 
-			if (showStatus) and (WoWBCC or WoWClassic) then
+			-- Bug report #6 indicates that GetContainerItemInfo isn't returning 'isBound' in the classics.
+			if (showStatus) and (WoWBCC or WoWClassic or WoWWotLK) then
 				ScannerTip.owner = self
 				ScannerTip.bag = bag
 				ScannerTip.slot = slot
 				ScannerTip:SetOwner(self, "ANCHOR_NONE")
 				ScannerTip:SetBagItem(bag,slot)
 
-				for i = 2,6 do 
+				for i = 2,6 do
 					local line = _G[ScannerTipName.."TextLeft"..i]
 					if (not line) then
 						break
 					end
 					local msg = line:GetText()
-					if (msg) then 
-						if (string_find(msg, S_ITEM_BOUND1) or string_find(msg, S_ITEM_BOUND2) or string_find(msg, S_ITEM_BOUND3)) then 
+					if (msg) then
+						if (string_find(msg, S_ITEM_BOUND1) or string_find(msg, S_ITEM_BOUND2) or string_find(msg, S_ITEM_BOUND3)) then
 							showStatus = nil
 							break
 						end
@@ -193,17 +195,17 @@ local Update = function(self)
 				ItemBind:SetText((bindType == 3) and L["BoU"] or L["BoE"])
 				return
 			else
-				if Cache_ItemBind[self] then 
+				if Cache_ItemBind[self] then
 					Cache_ItemBind[self]:SetText("")
-				end	
+				end
 			end
 
 		end
-	end	
-	if (Cache_ItemBind[self]) then 
+	end
+	if (Cache_ItemBind[self]) then
 		Cache_ItemBind[self]:SetText("")
 	end
-end 
+end
 
 local item = Bagnon.ItemSlot or Bagnon.Item
 if (item) and (item.Update) then
