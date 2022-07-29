@@ -44,7 +44,12 @@ local S_ITEM_BOUND2 = _G.ITEM_ACCOUNTBOUND
 local S_ITEM_BOUND3 = _G.ITEM_BNETACCOUNTBOUND
 
 -- WoW Client versions
-local MAJOR = tonumber((string_split(".", (GetBuildInfo()))))
+local currentClientPatch, currentClientBuild = GetBuildInfo()
+currentClientBuild = tonumber(currentClientBuild)
+
+local MAJOR,MINOR,PATCH = string.split(".", currentClientPatch)
+MAJOR = tonumber(MAJOR)
+
 local WoWClassic = MAJOR == 1
 local WoWBCC = MAJOR == 2
 local WoWWotLK = MAJOR == 3
