@@ -1,58 +1,55 @@
-if (not Bagnon) then
+--[[
+
+	The MIT License (MIT)
+
+	Copyright (c) 2022 Lars Norberg
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+
+--]]
+local Addon, Private =  ...
+if (Private.Incompatible) then
+	print("|cffff1111"..Addon.." was auto-disabled.")
 	return
 end
-if (function(addon)
-	for i = 1,GetNumAddOns() do
-		local name, title, notes, loadable, reason, security, newVersion = GetAddOnInfo(i)
-		if (name:lower() == addon:lower()) then
-			local enabled = not(GetAddOnEnableState(UnitName("player"), i) == 0)
-			if (enabled and loadable) then
-				return true
-			end
-		end
-	end
-end)("Bagnon_ItemInfo") then
-	print("|cffff1111"..(...).." was auto-disabled.")
-	return
-end
 
-local MODULE =  ...
-local ADDON, Addon = MODULE:match("[^_]+"), _G[MODULE:match("[^_]+")]
-local Module = Bagnon:NewModule("BindOnEquip", Addon)
+local Module = Bagnon:NewModule(Addon, Private)
 
--- Tooltip used for scanning
-local ScannerTipName = "BagnonItemInfoScannerTooltip"
-local ScannerTip = _G[ScannerTipName] or CreateFrame("GameTooltip", ScannerTipName, WorldFrame, "GameTooltipTemplate")
-
--- Lua API
+-- Speed!
 local _G = _G
 local string_find = string.find
-local string_gsub = string.gsub
-local string_lower = string.lower
-local string_match = string.match
-local string_split = string.split
-local string_upper = string.upper
 
 -- WoW API
-local GetContainerItemInfo = _G.GetContainerItemInfo
-local GetItemQualityColor = _G.GetItemQualityColor
-local GetItemInfo = _G.GetItemInfo
+local GetContainerItemInfo = C_Container and C_Container.GetContainerItemInfo or GetContainerItemInfo
 
--- WoW Strings
-local S_ITEM_BOUND1 = _G.ITEM_SOULBOUND
-local S_ITEM_BOUND2 = _G.ITEM_ACCOUNTBOUND
-local S_ITEM_BOUND3 = _G.ITEM_BNETACCOUNTBOUND
+local retail = Private.IsRetail
+local cache = Private.cache
+local tooltip = Private.tooltip
+local tooltipName = Private.tooltipName
 
--- WoW Client versions
-local currentClientPatch, currentClientBuild = GetBuildInfo()
-currentClientBuild = tonumber(currentClientBuild)
+-- Font object
+local font_object = NumberFont_Outline_Med or NumberFontNormal
 
-local MAJOR,MINOR,PATCH = string.split(".", currentClientPatch)
-MAJOR = tonumber(MAJOR)
-
-local WoWClassic = MAJOR == 1
-local WoWBCC = MAJOR == 2
-local WoWWotLK = MAJOR == 3
+-- Search patterns
+local s_item_bound1 = ITEM_SOULBOUND
+local s_item_bound2 = ITEM_ACCOUNTBOUND
+local s_item_bound3 = ITEM_BNETACCOUNTBOUND
 
 -- Localization.
 -- *Just enUS so far.
@@ -61,158 +58,124 @@ local L = {
 	["BoU"] = "BoU"  -- Bind on Use
 }
 
--- FontString Caches
-local Cache_ItemBind = {}
+-- Custom color cache
+-- Allows us control, gives us speed.
+local colors = {
+	[0] = { 157/255, 157/255, 157/255 }, -- Poor
+	[1] = { 240/255, 240/255, 240/255 }, -- Common
+	[2] = { 30/255, 178/255, 0/255 }, -- Uncommon
+	[3] = { 0/255, 112/255, 221/255 }, -- Rare
+	[4] = { 163/255, 53/255, 238/255 }, -- Epic
+	[5] = { 225/255, 96/255, 0/255 }, -- Legendary
+	[6] = { 229/255, 204/255, 127/255 }, -- Artifact
+	[7] = { 79/255, 196/255, 225/255 }, -- Heirloom
+	[8] = { 79/255, 196/255, 225/255 } -- Blizzard
+}
 
+Module:AddUpdater(function(self)
 
------------------------------------------------------------
--- Slash Command & Options Handling
------------------------------------------------------------
-do
-	-- Saved settings
-	BagnonBoE_DB = {
-		enableRarityColoring = true
-	}
+	local message, color, mult
 
-	local slashCommand = function(msg, editBox)
-		local action, element
+	if (self.hasItem) then
 
-		-- Remove spaces at the start and end
-		msg = string_gsub(msg, "^%s+", "")
-		msg = string_gsub(msg, "%s+$", "")
+		local quality, bind = self.info.quality, self.info.bind
 
-		-- Replace all space characters with single spaces
-		msg = string_gsub(msg, "%s+", " ")
+		-- Item is BoE or BoU, has it been bound to the player yet?
+		if (quality and quality > 1) and (bind == 2 or bind == 3) then
 
-		-- Extract the arguments
-		if string_find(msg, "%s") then
-			action, element = string_split(" ", msg)
-		else
-			action = msg
-		end
+			local show = true
 
-		if (action == "enable") then
-			if (element == "color") then
-				BagnonBoE_DB.enableRarityColoring = true
+			-- Only retail returns this info, and not always accurately
+			if (retail) then
+				local bag, slot = self.bag, self:GetID()
+				local _, _, _, _, _, _, _, _, _, _, bound = GetContainerItemInfo(bag, slot)
+				if (bound) then
+					show = nil
+				end
 			end
 
-		elseif (action == "disable") then
-			if (element == "color") then
-				BagnonBoE_DB.enableRarityColoring = false
-			end
-		end
-	end
-
-	-- Create a unique name for the command
-	local commands = { "bagnonboe", "bboe", "boe" }
-	for i = 1,#commands do
-		-- Register the chat command, keep hash upper case, value lowercase
-		local command = commands[i]
-		local name = "AZERITE_TEAM_PLUGIN_"..string_upper(command)
-		_G["SLASH_"..name.."1"] = "/"..string_lower(command)
-		_G.SlashCmdList[name] = slashCommand
-	end
-end
-
-
------------------------------------------------------------
--- Utility Functions
------------------------------------------------------------
-local GetPluginContainter = function(button)
-	local name = button:GetName() .. "ExtraInfoFrame"
-	local frame = _G[name]
-	if (not frame) then
-		frame = CreateFrame("Frame", name, button)
-		frame:SetAllPoints()
-	end
-	return frame
-end
-
-local Cache_GetItemBind = function(button)
-	if (not Cache_ItemBind[button]) then
-		local ItemBind = GetPluginContainter(button):CreateFontString()
-		ItemBind:SetDrawLayer("ARTWORK")
-		ItemBind:SetPoint("BOTTOMLEFT", 2, 2)
-		ItemBind:SetFontObject(_G.NumberFont_Outline_Med or _G.NumberFontNormal)
-		ItemBind:SetFont(ItemBind:GetFont(), 12, "OUTLINE")
-		ItemBind:SetShadowOffset(1, -1)
-		ItemBind:SetShadowColor(0, 0, 0, .5)
-		local UpgradeIcon = button.UpgradeIcon
-		if UpgradeIcon then
-			UpgradeIcon:ClearAllPoints()
-			UpgradeIcon:SetPoint("BOTTOMRIGHT", 2, 0)
-		end
-		Cache_ItemBind[button] = ItemBind
-	end
-	return Cache_ItemBind[button]
-end
-
------------------------------------------------------------
--- Main Update
------------------------------------------------------------
-local Update = function(self)
-	local itemLink = self:GetItem()
-	if (itemLink) then
-		local itemName, _itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, iconFileDataID, itemSellPrice, itemClassID, itemSubClassID, bindType, expacID, itemSetID, isCraftingReagent = GetItemInfo(itemLink)
-
-		if (itemRarity and (itemRarity > 1)) and ((bindType == 2) or (bindType == 3)) then
-			-- print("parsing", itemName, itemRarity, bindType) -- ok
-
-			local showStatus = true
-			local bag,slot = self:GetBag(),self:GetID()
-			local _, _, _, _, _, _, _, _, _, _, isBound = GetContainerItemInfo(bag, slot)
-			if (isBound) then
-				showStatus = nil
-			end
-
-			-- Bug report #6 indicates that GetContainerItemInfo isn't returning 'isBound' in the classics.
-			if (showStatus) and (WoWBCC or WoWClassic or WoWWotLK) then
-				ScannerTip.owner = self
-				ScannerTip.bag = bag
-				ScannerTip.slot = slot
-				ScannerTip:SetOwner(self, "ANCHOR_NONE")
-				ScannerTip:SetBagItem(bag,slot)
+			-- Scan the tooltip to see if the item is bound.
+			if (show) then
+				if (not tooltip.owner or not tooltip.bag or not tooltip.slot) then
+					tooltip.owner, tooltip.bag,tooltip.slot = self, self.bag, self:GetID()
+					tooltip:SetOwner(tooltip.owner, "ANCHOR_NONE")
+					tooltip:SetBagItem(tooltip.bag, tooltip.bag)
+				end
 
 				for i = 2,6 do
-					local line = _G[ScannerTipName.."TextLeft"..i]
+					local line = _G[tooltipName.."TextLeft"..i]
 					if (not line) then
 						break
 					end
-					local msg = line:GetText()
-					if (msg) then
-						if (string_find(msg, S_ITEM_BOUND1) or string_find(msg, S_ITEM_BOUND2) or string_find(msg, S_ITEM_BOUND3)) then
-							showStatus = nil
-							break
-						end
+
+					local msg = line:GetText() or ""
+					if (string_find(msg, s_item_bound1) or string_find(msg, s_item_bound2) or string_find(msg, s_item_bound3)) then
+						show = nil
+						break
 					end
 				end
 			end
 
-			if (showStatus) then
-				local ItemBind = Cache_ItemBind[self] or Cache_GetItemBind(self)
+			-- Item isn't bound, decide the label
+			if (show) then
+
+				message = bind == 3 and L["BoU"] or L["BoE"]
+
 				if (BagnonBoE_DB.enableRarityColoring) then
-					local r, g, b = GetItemQualityColor(itemRarity)
-					local m = (itemRarity == 3 or itemRarity == 4) and 1 or 2/3
-					ItemBind:SetTextColor(r * m, g * m, b * m)
-				else
-					ItemBind:SetTextColor(240/255, 240/255, 240/255)
-				end
-				ItemBind:SetText((bindType == 3) and L["BoU"] or L["BoE"])
-				return
-			else
-				if Cache_ItemBind[self] then
-					Cache_ItemBind[self]:SetText("")
+					color = quality and colors[quality]
+					mult = (quality ~= 3 and quality ~= 4) and .7
 				end
 			end
 
 		end
 	end
-	if (Cache_ItemBind[self]) then
-		Cache_ItemBind[self]:SetText("")
-	end
-end
 
-local item = Bagnon.ItemSlot or Bagnon.Item
-if (item) and (item.Update) then
-	hooksecurefunc(item, "Update", Update)
-end
+	if (message) then
+
+		local label = cache[self]
+		if (not label) then
+
+			-- Only one container per item.
+			local name = self:GetName().."ExtraInfoFrame"
+			local container = _G[name]
+			if (not container) then
+				container = CreateFrame("Frame", name, self)
+				container:SetAllPoints()
+			end
+
+			-- Always move this to the same place.
+			local upgrade = self.UpgradeIcon
+			if (upgrade) then
+				upgrade:ClearAllPoints()
+				upgrade:SetPoint("BOTTOMRIGHT", 2, 0)
+			end
+
+			-- This is specific to this plugin.
+			label = container:CreateFontString()
+			label:SetDrawLayer("ARTWORK", 1)
+			label:SetPoint("BOTTOMLEFT", 2, 2)
+			label:SetFontObject(font_object)
+			label:SetFont(label:GetFont(), 12, "OUTLINE")
+			label:SetShadowOffset(1, -1)
+			label:SetShadowColor(0, 0, 0, .5)
+
+			cache[self] = label
+		end
+
+		label:SetText(message)
+
+		if (color) then
+			if (mult) then
+				label:SetTextColor(color[1] * mult, color[2] * mult, color[3] * mult)
+			else
+				label:SetTextColor(color[1], color[2], color[3])
+			end
+		else
+			label:SetTextColor(.94, .94, .94)
+		end
+
+	elseif (cache[self]) then
+		cache[self]:SetText("")
+	end
+
+end)
