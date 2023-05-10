@@ -85,6 +85,9 @@ Module:AddUpdater(function(self)
 	if (self.hasItem) then
 
 		local quality, bind = self.info.quality, self.info.bind
+		if (not bind) then
+			_,_,_,_,_,_,_,_,_,_,_,_,_, bind = GetItemInfo(self.info.hyperlink)
+		end
 
 		-- Item is BoE or BoU, has it been bound to the player yet?
 		if (quality and quality > 1) and (bind == 2 or bind == 3) then
