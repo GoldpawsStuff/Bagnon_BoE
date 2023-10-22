@@ -2,7 +2,7 @@ package-as: Bagnon_BoE
 enable-nolib-creation: no
 
 externals:
-    Libs/TaintLess:
+    Bagnon_BoE/Libs/TaintLess:
         url: https://www.townlong-yak.com/addons.git/taintless
         commit: default
 
