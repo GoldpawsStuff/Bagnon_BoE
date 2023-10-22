@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.69-Release] 2023-10-22
+## [2.0.70-Release] 2023-10-22
 ### Fixed
 - Fixed faulty embeds that may or may not have caused a startup error.
 
