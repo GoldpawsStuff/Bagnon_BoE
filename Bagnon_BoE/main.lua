@@ -90,9 +90,10 @@ Module:AddUpdater(function(self)
 		end
 
 		-- Item is BoE or BoU, has it been bound to the player yet?
-		if (quality and quality > 1) and (bind == 2 or bind == 3) then
+		-- *in retail, all items can bind now thanks to transmogs
+		if (quality and ((retail and quality >= 0) or quality > 1)) and (bind == 2 or bind == 3) then
 
-			local show = true
+				local show = true
 			local bag, slot = self:GetBag(), self:GetID()
 
 			if (retail or wrath) then
