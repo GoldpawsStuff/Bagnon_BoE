@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.72-Release] 2023-11-01
+### Changed
+- Some minor performance tweaks. Everything matters!
+- Made the BoE/BoU labels brighter for poor and common quality items.
+
+### Fixed
+- Fixed an issue where underscore `_` was used as a global variable. Ouch.
+
 ## [2.0.71-Release] 2023-10-26
 ### Fixed
 - All item qualities including poor and common will now display the BoE label when appropriate in Retail.

@@ -31,10 +31,14 @@ end
 
 local Module = Bagnon:NewModule(Addon, Private)
 
--- Speed!
+-- Lua API
 local _G = _G
 local ipairs = ipairs
 local string_find = string.find
+
+-- WoW API
+local C_Container, C_TooltipInfo, TooltipUtil = C_Container, C_TooltipInfo, TooltipUtil
+local CreateFrame, GetItemInfo, GetItemQualityColor = CreateFrame, GetItemInfo, GetItemQualityColor
 
 -- Addon cache
 local retail = Private.IsRetail
@@ -80,7 +84,8 @@ end
 
 Module:AddUpdater(function(self)
 
-	local message, color, mult
+	local db = BagnonBoE_DB
+	local message, color, mult, _
 
 	if (self.hasItem) then
 
@@ -160,9 +165,9 @@ Module:AddUpdater(function(self)
 
 				message = bind == 3 and L["BoU"] or L["BoE"]
 
-				if (BagnonBoE_DB.enableRarityColoring) then
-					color = quality and colors[quality]
-					mult = (quality ~= 3 and quality ~= 4) and .7
+				if (db.enableRarityColoring) then
+					color = quality and colors[quality > 0 and quality or 1]
+					mult = (quality ~= 3 and quality ~= 4 and quality ~= 0 and quality ~= 1) and .7
 				end
 			end
 
