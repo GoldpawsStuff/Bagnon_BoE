@@ -115,15 +115,6 @@ Module:AddUpdater(function(self)
 
 					local tooltipData = C_TooltipInfo.GetBagItem(bag,slot)
 					if (tooltipData) then
-
-						-- Assign data to 'type' and 'guid' fields.
-						TooltipUtil.SurfaceArgs(tooltipData)
-
-						-- Assign data to 'leftText' fields.
-						for _, line in ipairs(tooltipData.lines) do
-							TooltipUtil.SurfaceArgs(line)
-						end
-
 						for i = 2,6 do
 							local msg = tooltipData.lines[i] and tooltipData.lines[i].leftText
 							if (not msg) then break end
