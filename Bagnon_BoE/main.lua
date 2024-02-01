@@ -101,11 +101,10 @@ Module:AddUpdater(function(self)
 				local show = true
 			local bag, slot = self:GetBag(), self:GetID()
 
-			if (retail or wrath) then
-				local containerInfo = C_Container.GetContainerItemInfo(bag,slot)
-				if (containerInfo and containerInfo.isBound) then
-					show = nil
-				end
+			-- This has been added to the classics too now.
+			local containerInfo = C_Container and C_Container.GetContainerItemInfo(bag,slot)
+			if (containerInfo and containerInfo.isBound) then
+				show = nil
 			end
 
 			-- Scan the tooltip to see if the item is bound.
