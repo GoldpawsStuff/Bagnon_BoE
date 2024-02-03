@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.77-Release] 2024-02-02
+### Fixed
+- Fixed an issue where `GetItemInfo` would cause a bug when called early in the loading process.
+
 ## [2.0.76-Release] 2024-02-01
 ### Fixed
 - Fixed an issue where BoE labels would show even for already soulbound items when they were placed in the main bank container in Classic Era.
