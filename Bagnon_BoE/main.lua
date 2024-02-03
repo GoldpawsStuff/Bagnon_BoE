@@ -90,7 +90,7 @@ Module:AddUpdater(function(self)
 	if (self.hasItem) then
 
 		local quality, bind = self.info.quality, self.info.bind
-		if (not bind) then
+		if (not bind and self.info.hyperlink) then
 			_,_,_,_,_,_,_,_,_,_,_,_,_, bind = GetItemInfo(self.info.hyperlink)
 		end
 
