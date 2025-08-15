@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.88-Release] 2025-08-15
+- Added compatibility with Classic MoP Client Patch 5.5.0.
+- Added compatibility with Bagnonium!
+
 ## [2.0.87-Release] 2025-06-18
-- Updated for Retail client patch 11.1.7.
-- Updated for Classic Era client patch 1.15.7.
+- Updated for Retail Client Patch 11.1.7.
+- Updated for Classic Era Client Patch 1.15.7.
 
 ## [2.0.86-Release] 2025-04-02
 ### Fixed

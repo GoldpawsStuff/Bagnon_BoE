@@ -29,6 +29,7 @@ if (Private.Incompatible) then
 	return
 end
 
+local Bagnon = Bagnon or Bagnonium
 local Module = Bagnon:NewModule(Addon, Private)
 
 -- Lua API
